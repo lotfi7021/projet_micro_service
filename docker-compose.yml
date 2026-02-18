@@ -1,0 +1,126 @@
+version: '3.8'
+
+services:
+  # 1. Base de données MySQL (une seule instance, 4 databases)
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-microservices
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./databases:/docker-entrypoint-initdb.d  # Les 4 fichiers .sql seront exécutés
+      - mysql-data:/var/lib/mysql
+    networks:
+      - microservices-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # 2. Eureka Server
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - microservices-network
+    depends_on:
+      - mysql-db
+
+  # 3. API Gateway
+  api-gateway:
+    build: ./APIGateway
+    container_name: api-gateway
+    ports:
+      - "8085:8085"
+    networks:
+      - microservices-network
+    depends_on:
+      - eureka-server
+
+  # 4. Auth Service (connecté à auth_db)
+  auth-service:
+    build: ./microserviceauth
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    networks:
+      - microservices-network
+    depends_on:
+      - eureka-server
+      - mysql-db
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+
+  # 5. Reclamation Service (connecté à reclamation_db)
+  reclamation-service:
+    build: ./reclamation-service
+    container_name: reclamation-service
+    ports:
+      - "8084:8084"
+    networks:
+      - microservices-network
+    depends_on:
+      - eureka-server
+      - mysql-db
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+
+  # 6. Products Service - Express.js (connecté à products_db)
+  products-service:
+    build: ./microservice-products
+    container_name: products-service
+    ports:
+      - "3000:3000"
+    networks:
+      - microservices-network
+    depends_on:
+      - eureka-server
+      - mysql-db
+    environment:
+      - DB_HOST=mysql-db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=products_db
+      - DB_PORT=3306
+      - PORT=3000
+
+  # 7. Facture Service - Laravel (connecté à microservice_facture)
+  facture-service:
+    build: ./microservice-facture
+    container_name: facture-service
+    ports:
+      - "8000:8000"
+    networks:
+      - microservices-network
+    depends_on:
+      - mysql-db
+      - api-gateway
+    environment:
+      - DB_HOST=mysql-db
+      - DB_PORT=3306
+      - DB_DATABASE=microservice_facture
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+      - APP_URL=http://facture-service:8000
+      - STOCK_SERVICE_URL=http://api-gateway:8085
+
+  # 8. Vue.js Frontend
+  vue-project:
+    build: ./vue-project
+    container_name: vue-project
+    ports:
+      - "5173:5173"
+    networks:
+      - microservices-network
+    depends_on:
+      - api-gateway
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8085
+
+networks:
+  microservices-network:
+    driver: bridge
+
+volumes:
+  mysql-data:

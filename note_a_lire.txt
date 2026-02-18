@@ -1,0 +1,8 @@
+note lanci eureka server 9bal
+lanci eureka serveur 
+lanci auth mciroservice 
+lanci recmalamtion
+lanci express commande npm start
+lanci laraval php artisan serve et temchi lel page http://127.0.0.1:8000 juste bech tet3amel el base de donnee 5atrou bhim laravel 
+kif bech testi bel postamn lazem ta9ra application.proprities mte api gatway w lazem ta9ra JwtAuthFilter bech tefhem 
+kol api tjarebha rahi tebda localhost:8085 w tebda testi
