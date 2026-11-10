@@ -8,7 +8,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - ./databases:/docker-entrypoint-initdb.d  # Les 4 fichiers .sql seront exécutés
       - mysql-data:/var/lib/mysql

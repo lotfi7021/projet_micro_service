@@ -1,0 +1,33 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+.qodo/
+
+# Java / Maven
+target/
+HELP.md
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.log
+npm-debug.log*
+
+# Laravel
+vendor/
+storage/*.key
+bootstrap/cache/*.php
+public/build/
+public/hot
+public/storage
+
+# Environnement (secrets locaux)
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
